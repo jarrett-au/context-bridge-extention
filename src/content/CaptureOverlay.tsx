@@ -32,11 +32,18 @@ export default function CaptureOverlay() {
         return;
     }
 
-    const handleMouseUp = () => {
-      // 如果点击的是插件自己的 UI，不处理 (需要在 Shadow DOM 外部判断，或者通过 event.composedPath())
-      // 但因为我们在 Shadow DOM 内部渲染，React 事件处理是局部的。
-      // 这里我们需要监听 document 的 mouseup。
+    const handleMouseUp = (e: MouseEvent) => {
+      // 检查点击是否发生在插件的 Shadow DOM 容器内
+      // 注意：由于 Shadow DOM 封装，外部事件的 target 可能是宿主元素
+      // 我们可以通过 composedPath() 来检查
+      const path = e.composedPath();
+      const isClickInside = path.some(node => (node as HTMLElement).id === 'context-bridge-root');
       
+      if (isClickInside) {
+          console.log('Context Bridge: Click inside overlay, ignoring global mouseup');
+          return;
+      }
+
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
         setVisible(false);
@@ -64,6 +71,7 @@ export default function CaptureOverlay() {
       div.appendChild(range.cloneContents());
       setSelectedHtml(div.innerHTML);
       setVisible(true);
+      console.log('Context Bridge: Selection detected, showing overlay');
     };
 
     // 监听全局 mouseup
@@ -75,20 +83,21 @@ export default function CaptureOverlay() {
   }, [enabled]);
 
   const handleCapture = async (e: React.MouseEvent) => {
+    console.log('Context Bridge: Save button clicked');
     e.stopPropagation();
     e.preventDefault();
     
-    if (!selectedHtml) return;
+    if (!selectedHtml) {
+        console.warn('Context Bridge: No selected HTML to capture');
+        return;
+    }
 
-    const turndownService = new TurndownService();
-    const markdown = turndownService.turndown(selectedHtml);
-
-    console.log('Captured Markdown:', markdown);
-
-    // 发送消息给 Background 或 Side Panel
-    // 注意：Side Panel 可能未打开，通常发送给 Background 或直接存储到 Storage
-    // 这里先存 Storage
     try {
+        const turndownService = new TurndownService();
+        const markdown = turndownService.turndown(selectedHtml);
+
+        console.log('Captured Markdown:', markdown);
+
         const newItem = {
             id: crypto.randomUUID(),
             type: 'text',
@@ -110,6 +119,7 @@ export default function CaptureOverlay() {
         const newClips = [newItem, ...clips];
         
         await chrome.storage.local.set({ clips: newClips });
+        console.log('Context Bridge: Saved to storage', newClips);
         
         // 通知 Side Panel (如果打开)
         chrome.runtime.sendMessage({ type: 'CLIP_ADDED', payload: newItem }).catch(() => {
@@ -143,9 +153,10 @@ export default function CaptureOverlay() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid #e5e7eb'
+        border: '1px solid #e5e7eb',
+        pointerEvents: 'auto'
       }}
-      onMouseDown={(e) => e.stopPropagation()} // 防止点击气泡时触发 document 的清理逻辑
+      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }} // 防止点击气泡时触发 document 的清理逻辑
       onClick={handleCapture}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 600, fontSize: '14px' }}>
