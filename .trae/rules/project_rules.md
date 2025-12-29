@@ -1,4 +1,6 @@
 # Project Rules: Context Bridge
+- **OS**: Windows 11
+- **Shell**: PowerShell
 
 ## 1. Core & Architecture
 - **Stack**: Manifest V3, React + Vite + TS, TailwindCSS, Zustand.
