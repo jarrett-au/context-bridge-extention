@@ -58,5 +58,30 @@ export function useClips() {
     await chrome.storage.local.set({ clips: newClips });
   };
 
-  return { clips, deleteClip, deleteClips, updateClipStatus, clearClips, reorderClips };
+  const addClip = async (clip: ClipItem) => {
+    // 获取最新的 clips 数据以避免竞态
+    const result = await chrome.storage.local.get(['clips']);
+    const currentClips = (result.clips as ClipItem[]) || [];
+    const newClips = [clip, ...currentClips];
+    setClips(newClips);
+    await chrome.storage.local.set({ clips: newClips });
+  };
+
+  const synthesizeAndArchive = async (newClip: ClipItem, sourceIds: string[]) => {
+    // 原子操作：添加新条目 + 归档旧条目
+    // 1. 获取最新数据
+    const result = await chrome.storage.local.get(['clips']);
+    const currentClips = (result.clips as ClipItem[]) || [];
+
+    // 2. 计算新状态
+    const newClips = [newClip, ...currentClips].map(c => 
+        sourceIds.includes(c.id) ? { ...c, status: 'archived' as const } : c
+    );
+
+    // 3. 更新
+    setClips(newClips);
+    await chrome.storage.local.set({ clips: newClips });
+  };
+
+  return { clips, deleteClip, deleteClips, updateClipStatus, clearClips, reorderClips, addClip, synthesizeAndArchive };
 }

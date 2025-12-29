@@ -8,11 +8,15 @@ import { useClips } from './hooks/useClips';
 import type { ClipItem } from '../types';
 
 function App() {
-  const { clips, deleteClip, deleteClips, updateClipStatus, reorderClips } = useClips();
+  const { clips, deleteClip, deleteClips, updateClipStatus, reorderClips, synthesizeAndArchive } = useClips();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const stagingItems = clips.filter(i => i.status === 'staging');
   const archivedItems = clips.filter(i => i.status === 'archived');
+
+  const itemsToSynthesize = selectedIds.size > 0 
+    ? stagingItems.filter(i => selectedIds.has(i.id))
+    : stagingItems;
 
   const handleReorderStaging = (newStagingItems: ClipItem[]) => {
     const otherItems = clips.filter(i => i.status !== 'staging');
@@ -42,6 +46,29 @@ function App() {
     await updateClipStatus([id], 'staging');
   };
 
+  const handleConfirmSynthesis = async (content: string, sourceItemIds: string[]) => {
+    // 1. Create new item
+    const newItem: ClipItem = {
+        id: crypto.randomUUID(),
+        type: 'text',
+        content: content,
+        metadata: {
+            source_url: 'context-bridge://synthesis',
+            source_title: 'Synthesized Content',
+            timestamp: Date.now(),
+            favicon: ''
+        },
+        status: 'staging',
+        token_estimate: Math.ceil(content.length / 4)
+    };
+    
+    // 2. Atomic update: Add new item AND archive source items
+    await synthesizeAndArchive(newItem, sourceItemIds);
+    
+    // 3. Clear selection
+    setSelectedIds(new Set());
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 text-gray-900">
       <Header />
@@ -55,7 +82,7 @@ function App() {
             onBatchDelete={handleBatchDelete}
             onBatchArchive={handleBatchArchive}
         />
-        <SynthesisZone stagingItems={stagingItems} />
+        <SynthesisZone items={itemsToSynthesize} onConfirm={handleConfirmSynthesis} />
         <ArchiveArea items={archivedItems} onRestore={handleRestore} onDelete={deleteClip} />
       </div>
     </div>

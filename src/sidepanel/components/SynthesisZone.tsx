@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Copy, X, Settings } from 'lucide-react';
+import { Sparkles, Copy, X, Settings, Check } from 'lucide-react';
 import type { ClipItem } from '../../types';
 
 interface SynthesisZoneProps {
-  stagingItems: ClipItem[];
+  items: ClipItem[];
+  onConfirm: (content: string, sourceItemIds: string[]) => void;
 }
 
 interface Template {
@@ -12,7 +13,7 @@ interface Template {
     content: string;
 }
 
-export function SynthesisZone({ stagingItems }: SynthesisZoneProps) {
+export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
   const [expanded, setExpanded] = useState(false);
   const [synthesizedContent, setSynthesizedContent] = useState('');
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -36,11 +37,11 @@ export function SynthesisZone({ stagingItems }: SynthesisZoneProps) {
   }, []);
 
   const handleSynthesize = () => {
-    if (stagingItems.length === 0) return;
+    if (items.length === 0) return;
 
     const template = templates.find(t => t.id === selectedTemplateId) || templates[0];
 
-    const content = stagingItems.map(item => {
+    const content = items.map(item => {
         let text = template.content;
         text = text.replace(/{{source_title}}/g, item.metadata.source_title);
         text = text.replace(/{{source_url}}/g, item.metadata.source_url);
@@ -54,6 +55,13 @@ export function SynthesisZone({ stagingItems }: SynthesisZoneProps) {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(synthesizedContent).catch(console.error);
+  };
+
+  const handleConfirm = () => {
+    const sourceIds = items.map(i => i.id);
+    onConfirm(synthesizedContent, sourceIds);
+    setExpanded(false);
+    setSynthesizedContent('');
   };
 
   const openOptions = () => {
@@ -80,11 +88,11 @@ export function SynthesisZone({ stagingItems }: SynthesisZoneProps) {
                 </div>
                 <button 
                     onClick={handleSynthesize}
-                    disabled={stagingItems.length === 0}
+                    disabled={items.length === 0}
                     className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                     <Sparkles size={16} />
-                    <span>Synthesize ({stagingItems.length})</span>
+                    <span>Synthesize ({items.length})</span>
                 </button>
             </div>
         ) : (
@@ -94,6 +102,7 @@ export function SynthesisZone({ stagingItems }: SynthesisZoneProps) {
                         <Sparkles size={12} className="text-blue-500" /> Result
                     </span>
                     <div className="flex space-x-1">
+                        <button onClick={handleConfirm} className="p-1 hover:bg-green-100 text-green-600 rounded" title="Confirm & Archive Source"><Check size={14} /></button>
                         <button onClick={handleCopy} className="p-1 hover:bg-gray-200 rounded text-gray-500" title="Copy"><Copy size={14} /></button>
                         <button onClick={() => setExpanded(false)} className="p-1 hover:bg-gray-200 rounded text-gray-500" title="Close"><X size={14} /></button>
                     </div>
