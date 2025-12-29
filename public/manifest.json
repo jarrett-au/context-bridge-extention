@@ -3,7 +3,13 @@
   "name": "Context Bridge",
   "version": "1.0.0",
   "description": "LLM 时代的外部记忆组装工厂",
-  "permissions": ["sidePanel", "storage", "activeTab", "scripting"],
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "activeTab",
+    "scripting",
+    "contextMenus"
+  ],
   "host_permissions": ["<all_urls>"],
   "side_panel": {
     "default_path": "src/sidepanel/index.html"
