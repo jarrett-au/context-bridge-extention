@@ -48,12 +48,18 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-sm font-semibold text-gray-500 uppercase">Staging Area</h2>
         {selectedIds.size > 0 ? (
-             <div className="flex space-x-2">
+             <div className="flex items-center space-x-2">
+                 <span className="text-xs text-gray-400 font-medium">
+                   {items.filter(i => selectedIds.has(i.id)).reduce((acc, curr) => acc + curr.token_estimate, 0).toLocaleString()} tokens
+                 </span>
+                 <div className="h-3 w-px bg-gray-300 mx-1"></div>
                  {onBatchArchive && <button onClick={onBatchArchive} className="text-xs text-blue-600 hover:text-blue-800 font-medium">Archive ({selectedIds.size})</button>}
                  {onBatchDelete && <button onClick={onBatchDelete} className="text-xs text-red-600 hover:text-red-800 font-medium">Delete ({selectedIds.size})</button>}
              </div>
         ) : (
-             <span className="text-xs text-gray-400">{items.length} items</span>
+             <span className="text-xs text-gray-400">
+               {items.length} items · {items.reduce((acc, curr) => acc + curr.token_estimate, 0).toLocaleString()} tokens
+             </span>
         )}
       </div>
       

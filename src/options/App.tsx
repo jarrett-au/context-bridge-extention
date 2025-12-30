@@ -11,9 +11,12 @@ export default function App() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateContent, setNewTemplateContent] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [baseUrl, setBaseUrl] = useState('');
+  const [model, setModel] = useState('');
 
   useEffect(() => {
-    chrome.storage.local.get(['templates'], (result) => {
+    chrome.storage.local.get(['templates', 'openai_api_key', 'openai_base_url', 'openai_model'], (result) => {
       if (result.templates) {
         setTemplates(result.templates as Template[]);
       } else {
@@ -33,8 +36,22 @@ export default function App() {
         setTemplates(defaults);
         chrome.storage.local.set({ templates: defaults });
       }
+
+      if (result.openai_api_key) setApiKey(result.openai_api_key as string);
+      if (result.openai_base_url) setBaseUrl(result.openai_base_url as string);
+      if (result.openai_model) setModel(result.openai_model as string);
     });
   }, []);
+
+  const saveSettings = () => {
+    chrome.storage.local.set({ 
+        openai_api_key: apiKey,
+        openai_base_url: baseUrl,
+        openai_model: model
+    }, () => {
+      alert('Settings saved');
+    });
+  };
 
   const saveTemplate = () => {
     if (!newTemplateName || !newTemplateContent) return;
@@ -67,6 +84,63 @@ export default function App() {
             Context Bridge Settings
         </h1>
       </header>
+
+      <section className="mb-12">
+        <h2 className="text-xl font-semibold mb-4">OpenAI Compatible Settings</h2>
+        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
+          
+          {/* Base URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Base URL (Optional)</label>
+            <input 
+              type="text" 
+              value={baseUrl}
+              onChange={e => setBaseUrl(e.target.value)}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="https://api.openai.com/v1"
+            />
+            <p className="text-xs text-gray-400 mt-1">Leave empty for default OpenAI URL</p>
+          </div>
+
+          {/* API Key */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+            <input 
+              type="password" 
+              value={apiKey}
+              onChange={e => setApiKey(e.target.value)}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="sk-..."
+            />
+          </div>
+
+          {/* Model */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Model (Optional)</label>
+            <input 
+              type="text" 
+              value={model}
+              onChange={e => setModel(e.target.value)}
+              className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="gpt-3.5-turbo"
+            />
+             <p className="text-xs text-gray-400 mt-1">Default: gpt-3.5-turbo</p>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button 
+              onClick={saveSettings}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Save size={16} /> Save Settings
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-2 border-t pt-4">
+            Your settings are stored locally in your browser. Compatible with OpenAI, DeepSeek, Moonshot, etc.
+          </p>
+        </div>
+      </section>
 
       <section className="mb-12">
         <h2 className="text-xl font-semibold mb-4">Synthesis Templates</h2>

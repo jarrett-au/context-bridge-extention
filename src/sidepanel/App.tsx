@@ -6,6 +6,7 @@ import { ArchiveArea } from './components/ArchiveArea';
 import { useClips } from './hooks/useClips';
 
 import type { ClipItem } from '../types';
+import { estimateTokens } from '../lib/tokenizer';
 
 function App() {
   const { clips, deleteClip, deleteClips, updateClipStatus, reorderClips, synthesizeAndArchive } = useClips();
@@ -59,7 +60,7 @@ function App() {
             favicon: ''
         },
         status: 'staging',
-        token_estimate: Math.ceil(content.length / 4)
+        token_estimate: estimateTokens(content)
     };
     
     // 2. Atomic update: Add new item AND archive source items

@@ -2,6 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import CaptureOverlay from './CaptureOverlay';
 import { parsePageContent } from './utils/parsePage';
+import { saveClip, getFavicon } from './utils/storage';
+import { ChatGPTAdapter } from './adapters/chatgpt';
+import type { ClipItem } from '../types';
+import { estimateTokens } from '../lib/tokenizer';
 
 console.log('Context Bridge Content Script Loaded');
 
@@ -33,6 +37,16 @@ createRoot(rootElement).render(
   </StrictMode>
 );
 
+// Initialize Site Adapters
+const adapters = [new ChatGPTAdapter()];
+const currentUrl = window.location.href;
+
+adapters.forEach(adapter => {
+    if (adapter.match(currentUrl)) {
+        adapter.init();
+    }
+});
+
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
   if (message.type === 'PARSE_PAGE') {
@@ -44,7 +58,7 @@ async function handleParsePage() {
   try {
     const { title, content } = await parsePageContent();
     
-    const newItem = {
+    const newItem: ClipItem = {
         id: crypto.randomUUID(),
         type: 'page_content',
         content: content,
@@ -55,24 +69,14 @@ async function handleParsePage() {
             favicon: getFavicon()
         },
         status: 'staging',
-        token_estimate: Math.ceil(content.length / 4)
+        token_estimate: estimateTokens(content)
     };
 
-    // Save to storage
-    const result = await chrome.storage.local.get(['clips']);
-    const clips = (result.clips as any[]) || [];
-    const newClips = [newItem, ...clips];
-    await chrome.storage.local.set({ clips: newClips });
+    await saveClip(newItem);
 
     alert('Page content saved to Context Bridge');
   } catch (error) {
     console.error('Failed to parse page:', error);
     alert('Failed to parse page content');
   }
-}
-
-function getFavicon() {
-    const link = document.querySelector("link[rel~='icon']");
-    if (!link) return '/vite.svg'; // Fallback
-    return (link as HTMLLinkElement).href;
 }

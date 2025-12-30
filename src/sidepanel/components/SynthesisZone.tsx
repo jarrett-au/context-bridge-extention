@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Copy, X, Settings, Check } from 'lucide-react';
+import { Sparkles, Copy, X, Settings, Check, Loader2 } from 'lucide-react';
 import type { ClipItem } from '../../types';
+import { synthesizeWithAI } from '../../lib/ai';
 
 interface SynthesisZoneProps {
   items: ClipItem[];
@@ -18,9 +19,13 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
   const [synthesizedContent, setSynthesizedContent] = useState('');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('default');
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [baseUrl, setBaseUrl] = useState('');
+  const [model, setModel] = useState('');
 
   useEffect(() => {
-      chrome.storage.local.get(['templates'], (result) => {
+      chrome.storage.local.get(['templates', 'openai_api_key', 'openai_base_url', 'openai_model'], (result) => {
           const storedTemplates = result.templates as Template[] | undefined;
           if (storedTemplates && storedTemplates.length > 0) {
               setTemplates(storedTemplates);
@@ -32,6 +37,16 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
                   name: 'Default',
                   content: '### Source: {{source_title}}\nURL: {{source_url}}\n\n{{content}}'
               }]);
+          }
+
+          if (result.openai_api_key) {
+              setApiKey(result.openai_api_key as string);
+          }
+          if (result.openai_base_url) {
+              setBaseUrl(result.openai_base_url as string);
+          }
+          if (result.openai_model) {
+              setModel(result.openai_model as string);
           }
       });
   }, []);
@@ -51,6 +66,40 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
 
     setSynthesizedContent(content);
     setExpanded(true);
+  };
+
+  const handleAISynthesize = async () => {
+      if (!apiKey) {
+          alert('Please set your OpenAI API Key in Settings first.');
+          chrome.runtime.openOptionsPage();
+          return;
+      }
+      
+      setIsSynthesizing(true);
+      setExpanded(true); // Show area immediately to show loading state
+      
+      try {
+          const combinedContent = items.map(item => 
+              `Title: ${item.metadata.source_title}\nURL: ${item.metadata.source_url}\nContent:\n${item.content}`
+          ).join('\n\n---\n\n');
+
+          const prompt = `Please synthesize the following content based on this template/instruction: "${templates.find(t => t.id === selectedTemplateId)?.content || 'Summarize and combine'}". Return only the result in Markdown.`;
+
+          const result = await synthesizeWithAI({
+              apiKey,
+              baseURL: baseUrl || undefined,
+              model: model || undefined,
+              prompt,
+              content: combinedContent
+          });
+
+          setSynthesizedContent(result);
+      } catch (error) {
+          console.error(error);
+          setSynthesizedContent('Error: Failed to synthesize with AI. Please check your API key and network connection.');
+      } finally {
+          setIsSynthesizing(false);
+      }
   };
 
   const handleCopy = () => {
@@ -86,17 +135,32 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
                         <Settings size={16} />
                     </button>
                 </div>
-                <button 
-                    onClick={handleSynthesize}
-                    disabled={items.length === 0}
-                    className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                    <Sparkles size={16} />
-                    <span>Synthesize ({items.length})</span>
-                </button>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={handleSynthesize}
+                        disabled={items.length === 0}
+                        className="flex-1 flex items-center justify-center space-x-2 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span>Template</span>
+                    </button>
+                    <button 
+                        onClick={handleAISynthesize}
+                        disabled={items.length === 0 || !apiKey}
+                        className={`flex-1 flex items-center justify-center space-x-2 text-white py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${!apiKey ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+                        title={!apiKey ? "Set API Key in Settings to enable AI" : "Synthesize with AI"}
+                    >
+                        <Sparkles size={16} />
+                        <span>AI Merge</span>
+                    </button>
+                </div>
             </div>
         ) : (
-            <div className="flex flex-col h-64 transition-all duration-300 ease-in-out">
+            <div className="flex flex-col h-64 transition-all duration-300 ease-in-out relative">
+                {isSynthesizing && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                        <Loader2 className="animate-spin text-blue-600" size={32} />
+                    </div>
+                )}
                 <div className="flex items-center justify-between p-2 bg-gray-50 border-b border-gray-100">
                     <span className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1">
                         <Sparkles size={12} className="text-blue-500" /> Result

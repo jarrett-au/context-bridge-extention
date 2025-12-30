@@ -1,25 +1,25 @@
-# Project Rules: Context Bridge
+## 0. Environment (MUST)
 - **OS**: Windows 11
 - **Shell**: PowerShell
 
-## 1. Core & Architecture
-- **Stack**: Manifest V3, React + Vite + TS, TailwindCSS, Zustand.
-- **Storage**: `chrome.storage.local` (short-term) -> `IndexedDB` (long-term).
-- **Modules**:
-  - **Background**: Persistence, messaging, menus.
-  - **Content**: `capture-overlay` (Shadow DOM), `readability`.
-  - **Side Panel**: UI (Staging, Synthesis, Archive).
-- **Pattern**: Separate UI from logic (use Hooks/Store).
+## 1. Architecture (MUST)
+- **MV3 & Modules**: Strict Manifest V3. Separate `background`, `content`, `sidepanel`.
+- **State**: **Zustand** for global state. Unidirectional data flow.
+- **Atomic Components**: Shared in `src/components`, feature-specific in `src/<feature>`.
 
-## 2. Standards
-- **Naming**: `kebab-case` (files), `PascalCase` (components/types), `camelCase` (funcs).
-- **TS**: Strict mode, NO `any`, interfaces required.
-- **React**: Functional components + Hooks only.
-- **Async**: Use `async/await` for Chrome APIs.
-- **Data**: `turndown` for Markdown; sanitize inputs (no script/style/video).
+## 2. Coding (SHOULD)
+- **TS & Style**: Strict TypeScript (no `any`). **TailwindCSS** only.
+- **Naming**: `PascalCase` components, `camelCase` hooks/vars/funcs.
+- **Async**: Prefer `async/await`.
 
-## 3. UX & Workflow
-- **Libs**: `dnd-kit` (DnD), `framer-motion` (Anim), `lucide-react` (Icons).
-- **Behavior**: Global Toggle OFF = No render. Debounce heavy tasks.
-- **Git**: `type(scope): description`.
-- **Phases**: MVP (Capture/Store) -> Flow (DnD/Anim) -> AI (Synthesis).
+## 3. Extension Core (MUST)
+- **Messaging**: Typed messages via `chrome.runtime`.
+- **Security**: Shadow DOM for content scripts. Minimal permissions.
+
+## 4. UI/UX (SHOULD)
+- **Stack**: **React 19**, **@dnd-kit** (Drag&Drop), **Framer Motion** (Animations).
+- **Responsive**: Adaptive side panel layout.
+
+## 5. Workflow (MAY)
+- **Git**: Semantic commits. Run `npm run lint` before commit.
+- **Refactor**: Split files >200 lines.
