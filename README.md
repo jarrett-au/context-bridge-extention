@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# Context Bridge Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Context Bridge is a Chrome Extension designed to help users bridge the gap between web content and LLMs (Large Language Models). It allows you to capture, organize, and synthesize web clips into structured context for AI interactions.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **📸 Capture**: Extract content from any webpage (with special adapters for ChatGPT, etc.) using a simple overlay.
+- **🗂️ Organize**: Manage your clips in a Side Panel.
+  - **Drag & Drop**: Reorder clips easily.
+  - **Staging & Archive**: Keep your workspace clean.
+- **🔗 Synthesize**:
+  - **Join Mode**: Concatenate multiple clips using customizable Markdown templates.
+  - **AI Refine Mode**: Use LLMs (OpenAI compatible) to summarize, polish, or extract insights from your clips.
+- **⚙️ Configurable**:
+  - Custom Join Templates.
+  - Custom AI Prompts.
+  - OpenAI-compatible API settings (Base URL, Model, API Key).
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19, Vite, TypeScript
+- **UI**: TailwindCSS, Lucide React, Framer Motion
+- **State Management**: Zustand
+- **Drag & Drop**: @dnd-kit
+- **Browser API**: Chrome Extension Manifest V3 (Side Panel, Storage, Scripting)
+- **AI Integration**: OpenAI SDK (Customizable Base URL)
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. **Build**
+   ```bash
+   npm run build
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3. **Load in Chrome**
+   - Open `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select the `dist` directory
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Usage
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. **Capture**: Click the extension icon or use the shortcut to activate the capture overlay on any page. Select the text or element you want to clip.
+2. **Side Panel**: Open the Chrome Side Panel and select "Context Bridge".
+3. **Manage**: Drag clips to reorder.
+4. **Synthesize**:
+   - Select clips in the Staging Area.
+   - Choose "Join" to merge them with a template.
+   - Choose "AI Refine" to process them with an LLM (requires API Key).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Configuration
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Go to the Extension Options page to:
+- Set up your OpenAI API Key and Base URL.
+- Manage Join Templates (e.g., specific formats for source citation).
+- Manage AI Prompts (e.g., "Summarize", "Translate", "Code Extraction").
+
+## License
+
+MIT
