@@ -18,3 +18,10 @@ export interface SynthesisItem extends ClipItem {
   parent_ids: string[];    // 关联的原始碎片 ID，用于溯源
   template_used: string;   // 使用的模板类型
 }
+
+export interface AiPrompt {
+  id: string;
+  name: string;
+  prompt: string;
+  is_default?: boolean;
+}
