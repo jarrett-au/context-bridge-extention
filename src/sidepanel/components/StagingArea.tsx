@@ -4,7 +4,8 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableClipItem } from './SortableClipItem';
 import { toast } from 'sonner';
-import { Scissors } from 'lucide-react';
+import { Scissors, Download, Copy as CopyIcon } from 'lucide-react';
+import { formatClipsToMarkdown, downloadMarkdown } from '../../lib/export';
 
 interface StagingAreaProps {
   items: ClipItem[];
@@ -14,9 +15,19 @@ interface StagingAreaProps {
   onReorder: (items: ClipItem[]) => void;
   onBatchDelete?: () => void;
   onBatchArchive?: () => void;
+  onUpdateContent: (id: string, content: string) => void;
 }
 
-export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, onReorder, onBatchDelete, onBatchArchive }: StagingAreaProps) {
+export function StagingArea({ 
+    items, 
+    selectedIds, 
+    onToggleSelection, 
+    onDelete, 
+    onReorder, 
+    onBatchDelete, 
+    onBatchArchive, 
+    onUpdateContent
+}: StagingAreaProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
         activationConstraint: {
@@ -48,6 +59,27 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
     });
   };
 
+  const handleBatchDownload = () => {
+    const selectedItems = items.filter(i => selectedIds.has(i.id));
+    if (selectedItems.length === 0) return;
+    
+    const markdown = formatClipsToMarkdown(selectedItems);
+    downloadMarkdown(markdown, `context-bridge-export-${Date.now()}.md`);
+    toast.success('Downloaded');
+  };
+
+  const handleBatchCopy = () => {
+    const selectedItems = items.filter(i => selectedIds.has(i.id));
+    if (selectedItems.length === 0) return;
+
+    const markdown = formatClipsToMarkdown(selectedItems);
+    navigator.clipboard.writeText(markdown).then(() => {
+        toast.success('Copied to clipboard');
+    }).catch(() => {
+        toast.error('Failed to copy');
+    });
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
       <div className="flex items-center justify-between mb-2">
@@ -57,7 +89,14 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
                  <span className="text-xs text-gray-400 font-medium">
                    {items.filter(i => selectedIds.has(i.id)).reduce((acc, curr) => acc + curr.token_estimate, 0).toLocaleString()} tokens
                  </span>
+                 
                  <div className="h-3 w-px bg-gray-300 mx-1"></div>
+                 
+                 <button onClick={handleBatchCopy} className="text-gray-400 hover:text-blue-600 p-1" title="Copy as Markdown"><CopyIcon size={14} /></button>
+                 <button onClick={handleBatchDownload} className="text-gray-400 hover:text-blue-600 p-1" title="Download Markdown"><Download size={14} /></button>
+
+                 <div className="h-3 w-px bg-gray-300 mx-1"></div>
+                 
                  {onBatchArchive && <button onClick={onBatchArchive} className="text-xs text-blue-600 hover:text-blue-800 font-medium">Archive ({selectedIds.size})</button>}
                  {onBatchDelete && <button onClick={onBatchDelete} className="text-xs text-red-600 hover:text-red-800 font-medium">Delete ({selectedIds.size})</button>}
              </div>
@@ -97,6 +136,7 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
                   onToggle={onToggleSelection}
                   onDelete={onDelete}
                   onCopy={handleCopy}
+                  onUpdateContent={onUpdateContent}
                 />
               ))}
             </div>

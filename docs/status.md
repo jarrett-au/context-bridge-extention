@@ -40,17 +40,12 @@
 - [x] **Claude.ai 适配**: 增加对 Claude 的深度支持（复用 Adapter 模式）。
 - [x] **视觉优化**: 统一 Capture Overlay 的样式，使其更符合原生 OS 质感。
 
-### Phase 2: Power User Features (v0.3.0) - *Next Priority*
+### Phase 2: Power Features (v0.3.0) - *Next Priority*
 > **目标**: 覆盖开发者核心工作流。
 
-- [ ] **GitHub Adapter**: 一键抓取代码片段、Issue 讨论、PR 描述。
-- [ ] **Local LLM Support**: 显式支持 Ollama/LM Studio (无需手动配 Base URL)。
-- [ ] **快捷键支持**: `Alt+C` 快速捕获选区，`Alt+S` 打开侧边栏。
+- [ ] **编辑 Clip**: 直接在 Sidepanel 编辑 Clip 内容。
+- [ ] **快捷键支持**: `Ctrl+I` 打开侧边栏。
 - [ ] **导出增强**: 支持一键导出为 Markdown 文件或复制到剪贴板（兼容 Obsidian/Notion 格式）。
-
-### Phase 3: Ecosystem (v1.0.0)
-> **目标**: 正式发布版本。
-
 - [ ] **Tag 系统**: 对 Clip 进行分类管理。
 - [ ] **历史归档搜索**: 本地全文检索。
 - [ ] **Onboarding Tour**: 首次安装的交互式教程。
