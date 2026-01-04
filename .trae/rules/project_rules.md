@@ -1,25 +1,21 @@
-## 0. Environment (MUST)
-- **OS**: Windows 11
-- **Shell**: PowerShell
+---
+alwaysApply: true
+---
+# Project Rules
 
-## 1. Architecture (MUST)
-- **MV3 & Modules**: Strict Manifest V3. Separate `background`, `content`, `sidepanel`.
-- **State**: **Zustand** for global state. Unidirectional data flow.
-- **Atomic Components**: Shared in `src/components`, feature-specific in `src/<feature>`.
+## 1. Core Stack
+- **OS**: Windows 11 (PowerShell)
+- **Runtime**: Node.js (Module type)
+- **Framework**: React 19.2.0, TypeScript 5.9
+- **Build**: Vite (Rolldown), MV3 Extension
 
-## 2. Coding (SHOULD)
-- **TS & Style**: Strict TypeScript (no `any`). **TailwindCSS** only.
-- **Naming**: `PascalCase` components, `camelCase` hooks/vars/funcs.
-- **Async**: Prefer `async/await`.
+## 2. Key Libs
+- **UI**: Tailwind CSS v4, Framer Motion, Lucide React
+- **DnD**: @dnd-kit (Core/Sortable)
+- **AI**: OpenAI SDK, gpt-tokenizer
+- **Utils**: clsx, tailwind-merge, zustand
 
-## 3. Extension Core (MUST)
-- **Messaging**: Typed messages via `chrome.runtime`.
-- **Security**: Shadow DOM for content scripts. Minimal permissions.
-
-## 4. UI/UX (SHOULD)
-- **Stack**: **React 19**, **@dnd-kit** (Drag&Drop), **Framer Motion** (Animations).
-- **Responsive**: Adaptive side panel layout.
-
-## 5. Workflow (MAY)
-- **Git**: Semantic commits. Run `npm run lint` before commit.
-- **Refactor**: Split files >200 lines.
+## 3. Philosophy
+- **Modular**: Small files/functions.
+- **Typed**: Strict TS. No `any`.
+- **Atomic**: Feature-based folder structure.

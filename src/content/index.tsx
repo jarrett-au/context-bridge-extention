@@ -1,9 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Toaster, toast } from 'sonner';
 import CaptureOverlay from './CaptureOverlay';
 import { parsePageContent } from './utils/parsePage';
 import { saveClip, getFavicon } from './utils/storage';
 import { ChatGPTAdapter } from './adapters/chatgpt';
+import { ClaudeAdapter } from './adapters/claude';
 import type { ClipItem } from '../types';
 import { estimateTokens } from '../lib/tokenizer';
 
@@ -26,6 +28,19 @@ document.body.appendChild(container);
 // Create shadow root
 const shadowRoot = container.attachShadow({ mode: 'open' });
 
+// Inject Tailwind styles into Shadow DOM
+// const style = document.createElement('style');
+// We need to fetch the bundled CSS and inject it here.
+// For now, we rely on Vite injecting styles, but in Shadow DOM it's tricky.
+// A common workaround in development is to import the CSS file as a string.
+// But since we use Tailwind, we might need to manually link the stylesheet.
+// However, since we are using `vite.content.config.ts`, the CSS is likely emitted as a separate file.
+// Let's try to find the link element in the main document head that Vite might have injected (if not using Shadow DOM),
+// OR we assume that for now we might lose styles in Shadow DOM unless we explicitly handle it.
+// FOR THIS PHASE: We will just add the Toaster inside the Shadow DOM.
+// Note: Sonner Toaster might need to be rendered inside the Shadow Root to be visible and styled correctly if we want isolation.
+// But Sonner portals to document.body by default. We need to tell it to portal to our shadow root container or just render inline.
+
 // Create a root element inside shadow dom
 const rootElement = document.createElement('div');
 shadowRoot.appendChild(rootElement);
@@ -34,11 +49,29 @@ shadowRoot.appendChild(rootElement);
 createRoot(rootElement).render(
   <StrictMode>
     <CaptureOverlay />
+    <Toaster position="top-right" toastOptions={{
+        style: {
+            background: 'white',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: 500,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            width: 'auto',
+            minWidth: '200px',
+            maxWidth: '320px',
+            gap: '8px',
+        },
+        className: 'context-bridge-toast'
+    }} />
   </StrictMode>
 );
 
 // Initialize Site Adapters
-const adapters = [new ChatGPTAdapter()];
+const adapters = [new ChatGPTAdapter(), new ClaudeAdapter()];
 const currentUrl = window.location.href;
 
 adapters.forEach(adapter => {
@@ -74,9 +107,9 @@ async function handleParsePage() {
 
     await saveClip(newItem);
 
-    alert('Page content saved to Context Bridge');
+    toast.success('Page content saved to Context Bridge');
   } catch (error) {
     console.error('Failed to parse page:', error);
-    alert('Failed to parse page content');
+    toast.error('Failed to parse page content');
   }
 }

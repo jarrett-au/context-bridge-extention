@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { Download } from 'lucide-react';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CaptureOverlay() {
   const [visible, setVisible] = useState(false);
@@ -126,44 +128,67 @@ export default function CaptureOverlay() {
             // 忽略错误 (例如 Side Panel 未打开)
         });
 
-        alert('已采集到 Context Bridge');
+        toast.success('已采集到 Context Bridge');
         setVisible(false);
         window.getSelection()?.removeAllRanges();
     } catch (err) {
         console.error('Capture failed:', err);
-        alert('采集失败');
+        toast.error('采集失败');
     }
   };
 
   if (!visible) return null;
 
   return (
-    <div 
-      ref={overlayRef}
-      style={{
-        position: 'absolute',
-        top: position.top,
-        left: position.left,
-        zIndex: 2147483647, // Max z-index
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        padding: '6px',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border: '1px solid #e5e7eb',
-        pointerEvents: 'auto'
-      }}
-      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }} // 防止点击气泡时触发 document 的清理逻辑
-      onClick={handleCapture}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 600, fontSize: '14px' }}>
-        <Download size={16} />
-        <span>Save</span>
-      </div>
-    </div>
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 10 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          ref={overlayRef}
+          style={{
+            position: 'absolute',
+            top: position.top,
+            left: position.left,
+            zIndex: 2147483647, // Max z-index
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.08)',
+            padding: '4px 8px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid rgba(229, 231, 235, 0.8)',
+            pointerEvents: 'auto',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            transformOrigin: 'center center'
+          }}
+          onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }} // 防止点击气泡时触发 document 的清理逻辑
+          onClick={handleCapture}
+          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 1)' }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 500, fontSize: '12px' }}>
+            <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                backgroundColor: '#f3f4f6', 
+                borderRadius: '4px', 
+                padding: '3px',
+                color: '#6366f1'
+            }}>
+                <Download size={13} strokeWidth={2.5} />
+            </div>
+            <span style={{ marginRight: '2px' }}>Save</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, RotateCcw } from 'lucide-react';
 import type { AiPrompt } from '../types';
 import { DEFAULT_AI_PROMPTS } from '../constants';
+import { toast } from 'sonner';
 
 interface Template {
   id: string;
@@ -68,7 +69,7 @@ export default function App() {
         openai_base_url: baseUrl,
         openai_model: model
     }, () => {
-      alert('Settings saved');
+      toast.success('Settings saved');
     });
   };
 

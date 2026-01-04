@@ -4,6 +4,7 @@ import { StagingArea } from './components/StagingArea';
 import { SynthesisZone } from './components/SynthesisZone';
 import { ArchiveArea } from './components/ArchiveArea';
 import { useClips } from './hooks/useClips';
+import { toast } from 'sonner';
 
 import type { ClipItem } from '../types';
 import { estimateTokens } from '../lib/tokenizer';
@@ -32,15 +33,21 @@ function App() {
   };
 
   const handleBatchDelete = async () => {
-    if (confirm(`Delete ${selectedIds.size} items?`)) {
+    // Improved UX: No native confirm, use Toast with potential undo (not implemented yet) or just notify
+    if (selectedIds.size === 0) return;
+    
+    // Simple confirm for now until we have Undo
+    if (window.confirm(`Delete ${selectedIds.size} items?`)) {
         await deleteClips(Array.from(selectedIds));
         setSelectedIds(new Set());
+        toast.success('Items deleted');
     }
   };
 
   const handleBatchArchive = async () => {
       await updateClipStatus(Array.from(selectedIds), 'archived');
       setSelectedIds(new Set());
+      toast.success('Items archived');
   };
 
   const handleRestore = async (id: string) => {
