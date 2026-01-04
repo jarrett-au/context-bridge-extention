@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StagingArea } from './components/StagingArea';
 import { SynthesisZone } from './components/SynthesisZone';
 import { ArchiveArea } from './components/ArchiveArea';
+import { Onboarding } from './components/Onboarding';
 import { useClips } from './hooks/useClips';
 import { toast } from 'sonner';
 
 import type { ClipItem } from '../types';
 import { estimateTokens } from '../lib/tokenizer';
 
+import { ResizeHandle } from './components/ui/ResizeHandle';
+
 function App() {
-  const { clips, deleteClip, deleteClips, updateClipStatus, reorderClips, synthesizeAndArchive } = useClips();
+  const { clips, deleteClip, deleteClips, updateClipStatus, reorderClips, synthesizeAndArchive, updateClipContent } = useClips();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  
+  // Layout state
+  const [stagingHeight, setStagingHeight] = useState(300);
+  const [initialStagingHeight, setInitialStagingHeight] = useState(300); // For smoother resizing
+  const [isStagingCollapsed, setIsStagingCollapsed] = useState(false);
+  const [isArchiveCollapsed, setIsArchiveCollapsed] = useState(false);
+
+  useEffect(() => {
+    chrome.storage.local.get('onboardingComplete', (res) => {
+        if (!res.onboardingComplete) {
+            setShowOnboarding(true);
+        }
+    });
+
+    // Notify background that side panel is open
+    const port = chrome.runtime.connect({ name: 'sidepanel' });
+    return () => {
+      port.disconnect();
+    };
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    chrome.storage.local.set({ onboardingComplete: true });
+    setShowOnboarding(false);
+  };
 
   const stagingItems = clips.filter(i => i.status === 'staging');
   const archivedItems = clips.filter(i => i.status === 'archived');
@@ -77,10 +106,27 @@ function App() {
     setSelectedIds(new Set());
   };
 
+  const handleResizeStart = () => {
+    setInitialStagingHeight(stagingHeight);
+  };
+
+  const handleStagingResize = (deltaY: number) => {
+    // Staging height = initial + delta
+    setStagingHeight(Math.max(100, Math.min(window.innerHeight - 200, initialStagingHeight + deltaY)));
+  };
+
+  const handleArchiveResize = (deltaY: number) => {
+    // Archive resizing moves the bottom of Synthesis zone / top of Archive
+    // Moving down (positive delta) -> Archive shrinks, Staging grows
+    // Moving up (negative delta) -> Archive grows, Staging shrinks
+    setStagingHeight(Math.max(100, Math.min(window.innerHeight - 200, initialStagingHeight + deltaY)));
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50 text-gray-900">
+    <div className="h-screen flex flex-col bg-gray-50 text-gray-900 relative overflow-hidden">
+      {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
       <Header />
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <StagingArea 
             items={stagingItems} 
             selectedIds={selectedIds}
@@ -89,9 +135,41 @@ function App() {
             onReorder={handleReorderStaging} 
             onBatchDelete={handleBatchDelete}
             onBatchArchive={handleBatchArchive}
+            onUpdateContent={updateClipContent}
+            isCollapsed={isStagingCollapsed}
+            onToggleCollapse={() => setIsStagingCollapsed(!isStagingCollapsed)}
+            style={{ 
+                height: isArchiveCollapsed ? 'auto' : (isStagingCollapsed ? 'auto' : `${stagingHeight}px`),
+                flex: isArchiveCollapsed ? '1 1 0' : (isStagingCollapsed ? '0 0 auto' : 'none'),
+                flexShrink: 0,
+                maxHeight: (isStagingCollapsed || isArchiveCollapsed) ? undefined : '70vh'
+            }}
         />
-        <SynthesisZone items={itemsToSynthesize} onConfirm={handleConfirmSynthesis} />
-        <ArchiveArea items={archivedItems} onRestore={handleRestore} onDelete={deleteClip} />
+        
+        {!isStagingCollapsed && !isArchiveCollapsed && (
+            <ResizeHandle onResize={handleStagingResize} onResizeStart={handleResizeStart} />
+        )}
+
+        <div className="flex-shrink-0">
+            <SynthesisZone items={itemsToSynthesize} onConfirm={handleConfirmSynthesis} />
+        </div>
+
+        {!isStagingCollapsed && !isArchiveCollapsed && (
+            <ResizeHandle onResize={handleArchiveResize} onResizeStart={handleResizeStart} />
+        )}
+
+        <ArchiveArea 
+            items={archivedItems} 
+            onRestore={handleRestore} 
+            onDelete={deleteClip} 
+            isCollapsed={isArchiveCollapsed}
+            onToggleCollapse={() => setIsArchiveCollapsed(!isArchiveCollapsed)}
+            style={{
+                flex: isArchiveCollapsed ? '0 0 auto' : '1 1 0',
+                minHeight: isArchiveCollapsed ? undefined : '0',
+                height: isArchiveCollapsed ? 'auto' : undefined
+            }}
+        />
       </div>
     </div>
   );

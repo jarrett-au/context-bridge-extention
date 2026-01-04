@@ -67,6 +67,12 @@ export function useClips() {
     await chrome.storage.local.set({ clips: newClips });
   };
 
+  const updateClipContent = async (id: string, content: string) => {
+    const newClips = clips.map(c => c.id === id ? { ...c, content, token_estimate: Math.ceil(content.length / 4) } : c);
+    setClips(newClips);
+    await chrome.storage.local.set({ clips: newClips });
+  };
+
   const synthesizeAndArchive = async (newClip: ClipItem, sourceIds: string[]) => {
     // 原子操作：添加新条目 + 归档旧条目
     // 1. 获取最新数据
@@ -83,5 +89,5 @@ export function useClips() {
     await chrome.storage.local.set({ clips: newClips });
   };
 
-  return { clips, deleteClip, deleteClips, updateClipStatus, clearClips, reorderClips, addClip, synthesizeAndArchive };
+  return { clips, deleteClip, deleteClips, updateClipStatus, clearClips, reorderClips, addClip, synthesizeAndArchive, updateClipContent };
 }

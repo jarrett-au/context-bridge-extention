@@ -1,5 +1,7 @@
 # Context Bridge Extension
 
+![Main Page](assets/main-page.png)
+
 Context Bridge is a Chrome Extension designed to help users bridge the gap between web content and LLMs (Large Language Models). It allows you to capture, organize, and synthesize web clips into structured context for AI interactions.
 
 ## Features
@@ -7,13 +9,18 @@ Context Bridge is a Chrome Extension designed to help users bridge the gap betwe
 - **📸 Capture**: Extract content from any webpage (with special adapters for ChatGPT, etc.) using a simple overlay.
 - **🗂️ Organize**: Manage your clips in a Side Panel.
   - **Drag & Drop**: Reorder clips easily.
+  - **Flexible Layout**: Resizable Staging and Archive areas with collapsible headers.
+  - **Shortcuts**: `Ctrl+I` to toggle the Side Panel instantly.
   - **Staging & Archive**: Keep your workspace clean.
 - **🔗 Synthesize**:
   - **Join Mode**: Concatenate multiple clips using customizable Markdown templates.
+    ![Join Templates](assets/join-templates.png)
   - **AI Refine Mode**: Use LLMs (OpenAI compatible) to summarize, polish, or extract insights from your clips.
+    ![AI Connection](assets/ai-connection.png)
 - **⚙️ Configurable**:
   - Custom Join Templates.
   - Custom AI Prompts.
+    ![AI Prompts](assets/ai-prompts.png)
   - OpenAI-compatible API settings (Base URL, Model, API Key).
 
 ## Tech Stack
@@ -46,8 +53,11 @@ Context Bridge is a Chrome Extension designed to help users bridge the gap betwe
 ## Usage
 
 1. **Capture**: Click the extension icon or use the shortcut to activate the capture overlay on any page. Select the text or element you want to clip.
-2. **Side Panel**: Open the Chrome Side Panel and select "Context Bridge".
-3. **Manage**: Drag clips to reorder.
+2. **Side Panel**: Press `Ctrl+I` or click "Open Side Panel" to activate.
+3. **Manage**: 
+   - Drag clips to reorder.
+   - Drag the boundary between Staging and Archive to resize.
+   - Click section headers to collapse/expand.
 4. **Synthesize**:
    - Select clips in the Staging Area.
    - Choose "Join" to merge them with a template.
