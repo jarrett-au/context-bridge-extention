@@ -4,6 +4,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableClipItem } from './SortableClipItem';
 import { toast } from 'sonner';
+import { Scissors } from 'lucide-react';
 
 interface StagingAreaProps {
   items: ClipItem[];
@@ -67,29 +68,41 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
         )}
       </div>
       
-      <DndContext 
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext 
-          items={items.map(item => item.id)}
-          strategy={verticalListSortingStrategy}
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 rounded-lg mt-2">
+            <div className="bg-gray-100 p-3 rounded-full mb-3">
+                <Scissors className="w-6 h-6 text-gray-400" />
+            </div>
+            <h3 className="text-sm font-medium text-gray-900">No clips yet</h3>
+            <p className="text-xs text-gray-500 mt-1 max-w-[200px]">
+                Select text on any webpage and look for the capture bubble.
+            </p>
+        </div>
+      ) : (
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <div className="space-y-3">
-            {items.map((item) => (
-              <SortableClipItem 
-                key={item.id} 
-                item={item} 
-                selected={selectedIds.has(item.id)}
-                onToggle={onToggleSelection}
-                onDelete={onDelete}
-                onCopy={handleCopy}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext 
+            items={items.map(item => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {items.map((item) => (
+                <SortableClipItem 
+                  key={item.id} 
+                  item={item} 
+                  selected={selectedIds.has(item.id)}
+                  onToggle={onToggleSelection}
+                  onDelete={onDelete}
+                  onCopy={handleCopy}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
     </div>
   );
 }

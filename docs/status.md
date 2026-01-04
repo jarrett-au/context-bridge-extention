@@ -1,46 +1,46 @@
 # Project Status & Roadmap
 
 > **更新日期**: 2026-01-04
-> **当前版本**: v0.1.0 (Alpha)
-> **状态**: 核心功能闭环，进入体验优化阶段
+> **当前版本**: v0.2.0 (Beta)
+> **状态**: Phase 1 完成，UX 显著提升
 
 ## 1. Executive Summary (执行摘要)
 
-**Context Bridge** 旨在成为连接 Web 信息碎片与 AI 认知的"第二大脑"桥梁。目前，我们已经完成了从 0 到 1 的核心链路建设，实现了"抓取-存储-合成"的最小可行性产品 (MVP)。
+**Context Bridge** 旨在成为连接 Web 信息碎片与 AI 认知的"第二大脑"桥梁。目前，我们已经完成了 v0.2.0 版本，重点优化了用户体验和扩展了对 Claude.ai 的支持。
 
-下一阶段的战略重点将从**"功能实现"**转向**"用户体验 (UX)"**与**"生态扩展 (Adapters)"**。我们需要降低用户的使用门槛，并扩大可抓取的高价值信息源。
+下一阶段 (Phase 2) 将专注于**"Power User Features"**，为开发者提供更强大的工作流支持。
 
-## 2. Current Progress (当前进展 v0.1.0)
+## 2. Current Progress (当前进展 v0.2.0)
 
 ### ✅ 已完成 (Completed)
 | 模块 | 功能点 | 说明 |
 | :--- | :--- | :--- |
+| **UX** | Toast 通知 | 集成 Sonner，全面替换 alert()，支持 Shadow DOM |
+| **UX** | Capture Overlay | 视觉重构，增加动画 (Framer Motion) 和磨砂玻璃效果 |
+| **UX** | Empty States | Sidepanel 各区域增加插画引导和空状态提示 |
+| **Adapter** | Claude.ai | 智能识别 Claude 聊天界面并注入采集按钮 |
 | **Infrastructure** | MV3 架构 | 采用 Vite + Rolldown 双构建流程，Shadow DOM 隔离 |
-| **Capture** | 通用抓取 | 基于 Readability 解析网页正文 |
 | **Capture** | ChatGPT Adapter | 针对 ChatGPT 动态注入抓取按钮 |
-| **Storage** | 数据同步 | 基于 Storage Events 的多端状态管理 |
-| **UI** | Sidepanel | 拖拽排序 (DnD)、分栏布局、暗色模式基础 |
-| **AI** | 合成引擎 | 支持 OpenAI 接口，自定义 Prompt 模板 |
+| **UI** | Sidepanel | 拖拽排序 (DnD)、分栏布局 |
 
 ### ⚠️ 已知问题 (Known Issues)
-- **交互粗糙**: 成功/失败反馈依赖原生 `alert()`，缺乏专业感。
-- **引导缺失**: 新用户安装后不知道如何开始。
-- **源覆盖少**: 仅深度适配了 ChatGPT，缺少 Claude、GitHub 等开发者高频场景。
+- **CSS 隔离**: 虽然大部分样式已内联或 scoped，但在极少数复杂页面可能仍有冲突。
+- **Claude Adapter**: 依赖 DOM 结构嗅探，Claude 界面更新可能导致失效（需长期维护）。
 - **安全隐患**: API Key 明文存储（MVP 阶段可接受，需排期改进）。
 
 ---
 
 ## 3. Product Roadmap (产品路线图)
 
-### Phase 1: Polish & Experience (v0.2.0) - *本周重点*
+### Phase 1: Polish & Experience (v0.2.0) - *Completed*
 > **目标**: 让产品"好用"，不仅仅是"能用"。
 
-- [ ] **UX 升级**: 引入 Toast 通知系统 (Sonner/Hot-toast)，移除所有 `alert()`。
-- [ ] **空状态设计**: Sidepanel 各个区域在无数据时提供引导文案和插画。
-- [ ] **Claude.ai 适配**: 增加对 Claude 的深度支持（复用 Adapter 模式）。
-- [ ] **视觉优化**: 统一 Capture Overlay 的样式，使其更符合原生 OS 质感。
+- [x] **UX 升级**: 引入 Toast 通知系统 (Sonner)，移除所有 `alert()`。
+- [x] **空状态设计**: Sidepanel 各个区域在无数据时提供引导文案和插画。
+- [x] **Claude.ai 适配**: 增加对 Claude 的深度支持（复用 Adapter 模式）。
+- [x] **视觉优化**: 统一 Capture Overlay 的样式，使其更符合原生 OS 质感。
 
-### Phase 2: Power User Features (v0.3.0)
+### Phase 2: Power User Features (v0.3.0) - *Next Priority*
 > **目标**: 覆盖开发者核心工作流。
 
 - [ ] **GitHub Adapter**: 一键抓取代码片段、Issue 讨论、PR 描述。
@@ -65,6 +65,6 @@
 
 ## 5. Next Actions (立即执行)
 
-1. **UX**: 实现 Toast 组件，替换现有 `alert`。
-2. **Feat**: 开发 `ClaudeAdapter`。
-3. **Docs**: 完善 `README.md` 的安装指南。
+1. **Review**: 验证 v0.2.0 的所有新功能。
+2. **Merge**: 将 `feature/phase1-ux-polish` 合并回主分支。
+3. **Plan**: 启动 Phase 2 (Power User Features)。

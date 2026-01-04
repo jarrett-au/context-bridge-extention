@@ -19,8 +19,11 @@ export function ArchiveArea({ items, onRestore, onDelete }: ArchiveAreaProps) {
       </div>
       
       {items.length === 0 ? (
-        <div className="text-center text-gray-400 py-8 text-sm">
-          No archived items
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="bg-gray-200/50 p-3 rounded-full mb-2">
+                <Archive className="w-5 h-5 text-gray-400" />
+            </div>
+            <p className="text-sm text-gray-500">No archived items</p>
         </div>
       ) : (
         <div className="space-y-2">

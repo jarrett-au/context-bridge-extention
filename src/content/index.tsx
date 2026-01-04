@@ -5,6 +5,7 @@ import CaptureOverlay from './CaptureOverlay';
 import { parsePageContent } from './utils/parsePage';
 import { saveClip, getFavicon } from './utils/storage';
 import { ChatGPTAdapter } from './adapters/chatgpt';
+import { ClaudeAdapter } from './adapters/claude';
 import type { ClipItem } from '../types';
 import { estimateTokens } from '../lib/tokenizer';
 
@@ -60,7 +61,7 @@ createRoot(rootElement).render(
 );
 
 // Initialize Site Adapters
-const adapters = [new ChatGPTAdapter()];
+const adapters = [new ChatGPTAdapter(), new ClaudeAdapter()];
 const currentUrl = window.location.href;
 
 adapters.forEach(adapter => {
