@@ -44,11 +44,17 @@ Context Bridge is a Chrome Extension designed to help users bridge the gap betwe
    npm run build
    ```
 
-3. **Load in Chrome**
+3. **Package for Release**
+   ```bash
+   npm run package
+   ```
+   This will create a `.zip` file in the `releases/` directory.
+
+4. **Load in Chrome**
    - Open `chrome://extensions/`
    - Enable "Developer mode"
    - Click "Load unpacked"
-   - Select the `dist` directory
+   - Select the `dist` directory (for development) or unzip the release file and select the folder.
 
 ## Usage
 
