@@ -4,7 +4,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableClipItem } from './SortableClipItem';
 import { toast } from 'sonner';
-import { Scissors, Download, Copy as CopyIcon } from 'lucide-react';
+import { Scissors, Download, Copy as CopyIcon, ChevronDown, ChevronRight } from 'lucide-react';
 import { formatClipsToMarkdown, downloadMarkdown } from '../../lib/export';
 
 interface StagingAreaProps {
@@ -16,6 +16,9 @@ interface StagingAreaProps {
   onBatchDelete?: () => void;
   onBatchArchive?: () => void;
   onUpdateContent: (id: string, content: string) => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  style?: React.CSSProperties;
 }
 
 export function StagingArea({ 
@@ -26,7 +29,10 @@ export function StagingArea({
     onReorder, 
     onBatchDelete, 
     onBatchArchive, 
-    onUpdateContent
+    onUpdateContent,
+    isCollapsed = false,
+    onToggleCollapse,
+    style
 }: StagingAreaProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -81,9 +87,20 @@ export function StagingArea({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase">Staging Area</h2>
+    <div className="flex flex-col overflow-hidden bg-gray-50 transition-[height] duration-200 ease-in-out" style={style}>
+      <div 
+        className="flex items-center justify-between p-4 pb-2 cursor-pointer hover:bg-gray-100/50 transition-colors select-none"
+        onClick={onToggleCollapse}
+      >
+        <div className="flex items-center gap-2">
+            {onToggleCollapse && (
+                <button className="text-gray-400 hover:text-gray-600">
+                    {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                </button>
+            )}
+            <h2 className="text-sm font-semibold text-gray-500 uppercase">Staging Area</h2>
+        </div>
+        
         {selectedIds.size > 0 ? (
              <div className="flex items-center space-x-2">
                  <span className="text-xs text-gray-400 font-medium">
@@ -107,41 +124,45 @@ export function StagingArea({
         )}
       </div>
       
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 rounded-lg mt-2">
-            <div className="bg-gray-100 p-3 rounded-full mb-3">
-                <Scissors className="w-6 h-6 text-gray-400" />
-            </div>
-            <h3 className="text-sm font-medium text-gray-900">No clips yet</h3>
-            <p className="text-xs text-gray-500 mt-1 max-w-[200px]">
-                Select text on any webpage and look for the capture bubble.
-            </p>
-        </div>
-      ) : (
-        <DndContext 
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext 
-            items={items.map(item => item.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {items.map((item) => (
-                <SortableClipItem 
-                  key={item.id} 
-                  item={item} 
-                  selected={selectedIds.has(item.id)}
-                  onToggle={onToggleSelection}
-                  onDelete={onDelete}
-                  onCopy={handleCopy}
-                  onUpdateContent={onUpdateContent}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+      {!isCollapsed && (
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            {items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 rounded-lg mt-2">
+                    <div className="bg-gray-100 p-3 rounded-full mb-3">
+                        <Scissors className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-900">No clips yet</h3>
+                    <p className="text-xs text-gray-500 mt-1 max-w-[200px]">
+                        Select text on any webpage and look for the capture bubble.
+                    </p>
+                </div>
+            ) : (
+                <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                >
+                <SortableContext 
+                    items={items.map(item => item.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className="space-y-3">
+                    {items.map((item) => (
+                        <SortableClipItem 
+                        key={item.id} 
+                        item={item} 
+                        selected={selectedIds.has(item.id)}
+                        onToggle={onToggleSelection}
+                        onDelete={onDelete}
+                        onCopy={handleCopy}
+                        onUpdateContent={onUpdateContent}
+                        />
+                    ))}
+                    </div>
+                </SortableContext>
+                </DndContext>
+            )}
+          </div>
       )}
     </div>
   );
