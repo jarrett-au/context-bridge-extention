@@ -49,11 +49,21 @@ shadowRoot.appendChild(rootElement);
 createRoot(rootElement).render(
   <StrictMode>
     <CaptureOverlay />
-    <Toaster position="top-center" richColors toastOptions={{
+    <Toaster position="top-right" toastOptions={{
         style: {
             background: 'white',
-            color: 'black',
+            color: '#0f172a',
             border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: 500,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            width: 'auto',
+            minWidth: '200px',
+            maxWidth: '320px',
+            gap: '8px',
         },
         className: 'context-bridge-toast'
     }} />

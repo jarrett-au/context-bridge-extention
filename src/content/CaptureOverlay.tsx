@@ -155,35 +155,36 @@ export default function CaptureOverlay() {
             zIndex: 2147483647, // Max z-index
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(8px)',
-            borderRadius: '12px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            padding: '8px 12px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.08)',
+            padding: '4px 8px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             border: '1px solid rgba(229, 231, 235, 0.8)',
             pointerEvents: 'auto',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            transformOrigin: 'center center'
           }}
           onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }} // 防止点击气泡时触发 document 的清理逻辑
           onClick={handleCapture}
           whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 1)' }}
           whileTap={{ scale: 0.95 }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontWeight: 500, fontSize: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 500, fontSize: '12px' }}>
             <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
                 backgroundColor: '#f3f4f6', 
-                borderRadius: '6px', 
-                padding: '4px',
+                borderRadius: '4px', 
+                padding: '3px',
                 color: '#6366f1'
             }}>
-                <Download size={16} strokeWidth={2.5} />
+                <Download size={13} strokeWidth={2.5} />
             </div>
-            <span style={{ marginRight: '4px' }}>Save to Bridge</span>
+            <span style={{ marginRight: '2px' }}>Save</span>
           </div>
         </motion.div>
       )}
