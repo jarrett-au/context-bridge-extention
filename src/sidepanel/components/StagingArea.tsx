@@ -3,6 +3,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableClipItem } from './SortableClipItem';
+import { toast } from 'sonner';
 
 interface StagingAreaProps {
   items: ClipItem[];
@@ -38,8 +39,11 @@ export function StagingArea({ items, selectedIds, onToggleSelection, onDelete, o
   };
 
   const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content).catch(err => {
+    navigator.clipboard.writeText(content).then(() => {
+        toast.success('Copied to clipboard');
+    }).catch(err => {
       console.error('Failed to copy:', err);
+      toast.error('Failed to copy');
     });
   };
 

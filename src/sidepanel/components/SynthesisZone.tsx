@@ -3,6 +3,7 @@ import { Sparkles, Copy, X, Settings, Check, Loader2, Link, Bot } from 'lucide-r
 import type { ClipItem, AiPrompt } from '../../types';
 import { synthesizeWithAI } from '../../lib/ai';
 import { DEFAULT_AI_PROMPTS } from '../../constants';
+import { toast } from 'sonner';
 
 interface SynthesisZoneProps {
   items: ClipItem[];
@@ -89,11 +90,12 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
 
     setSynthesizedContent(content);
     setExpanded(true);
+    toast.success('Joined successfully');
   };
 
   const handleAISynthesize = async () => {
       if (!apiKey) {
-          alert('Please set your OpenAI API Key in Settings first.');
+          toast.error('Please set your OpenAI API Key in Settings first.');
           chrome.runtime.openOptionsPage();
           return;
       }
@@ -130,9 +132,10 @@ export function SynthesisZone({ items, onConfirm }: SynthesisZoneProps) {
           });
 
           setSynthesizedContent(result);
+          toast.success('Synthesis complete');
       } catch (error) {
           console.error(error);
-          setSynthesizedContent('Error: Failed to synthesize with AI. Please check your API key and network connection.');
+          toast.error('Synthesis failed. Check your API Key and network.');
       } finally {
           setIsSynthesizing(false);
       }

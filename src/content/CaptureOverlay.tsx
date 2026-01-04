@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import TurndownService from 'turndown';
 import { Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CaptureOverlay() {
   const [visible, setVisible] = useState(false);
@@ -126,12 +127,12 @@ export default function CaptureOverlay() {
             // 忽略错误 (例如 Side Panel 未打开)
         });
 
-        alert('已采集到 Context Bridge');
+        toast.success('已采集到 Context Bridge');
         setVisible(false);
         window.getSelection()?.removeAllRanges();
     } catch (err) {
         console.error('Capture failed:', err);
-        alert('采集失败');
+        toast.error('采集失败');
     }
   };
 
