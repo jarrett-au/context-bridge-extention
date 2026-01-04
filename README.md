@@ -1,8 +1,8 @@
 # Context Bridge Extension
 
-![Main Page](assets/main-page.png)
-
 Context Bridge is a Chrome Extension designed to help users bridge the gap between web content and LLMs (Large Language Models). It allows you to capture, organize, and synthesize web clips into structured context for AI interactions.
+
+<img src="assets/main-page.png" alt="Main Page" style="zoom:80%;" />
 
 ## Features
 
